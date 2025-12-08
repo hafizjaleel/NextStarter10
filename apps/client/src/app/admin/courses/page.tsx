@@ -53,6 +53,11 @@ const courses = [
 ];
 
 export default function CoursesPage() {
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [level, setLevel] = useState('');
+  const [status, setStatus] = useState('');
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -67,24 +72,23 @@ export default function CoursesPage() {
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="flex gap-4">
-        {/* Search Input */}
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" strokeWidth={2} />
-            <input
-              type="text"
-              placeholder="Search courses..."
-              className="w-full rounded-lg bg-white border border-slate-100 pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
+      <div className="space-y-4">
+        <div className="flex-1 max-w-md">
+          <SearchInput
+            placeholder="Search courses..."
+            value={search}
+            onChange={setSearch}
+          />
         </div>
 
-        {/* Filter Button */}
-        <button className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-          <Filter className="h-4 w-4" strokeWidth={2} />
-          Filter
-        </button>
+        <FilterPanel
+          category={category}
+          level={level}
+          status={status}
+          onCategoryChange={setCategory}
+          onLevelChange={setLevel}
+          onStatusChange={setStatus}
+        />
       </div>
 
       {/* Courses Grid */}
