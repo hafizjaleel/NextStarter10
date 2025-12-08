@@ -88,27 +88,17 @@ export default function CoursesPage() {
       {/* Courses Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {courses.map((course) => (
-          <div
+          <CourseCard
             key={course.id}
-            className="group rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 overflow-hidden"
-          >
-            {/* Thumbnail Placeholder */}
-            <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-200" />
-
-            {/* Course Content */}
-            <div className="p-4">
-              <h3 className="text-base font-bold text-slate-900 group-hover:text-emerald-600 transition line-clamp-2">
-                {course.title}
-              </h3>
-              <p className="mt-2 text-xs text-slate-500">{course.instructor}</p>
-
-              {/* Footer */}
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-500">
-                <span>{course.episodes} lessons</span>
-                <span>{course.students} students</span>
-              </div>
-            </div>
-          </div>
+            title={course.title}
+            description={course.description}
+            category={course.category}
+            difficulty={course.difficulty}
+            episodes={course.episodes}
+            students={course.students}
+            badge={course.badge}
+            updated={course.updated}
+          />
         ))}
       </div>
     </div>
