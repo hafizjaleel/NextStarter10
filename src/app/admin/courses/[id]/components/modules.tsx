@@ -101,7 +101,7 @@ export function CourseModules() {
         setModules([...modules, newModule]);
       }
       setFormData({ title: '' });
-      setShowForm(false);
+      setIsPanelOpen(false);
     }
   };
 
