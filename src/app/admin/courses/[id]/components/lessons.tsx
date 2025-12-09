@@ -742,131 +742,158 @@ export function CourseLessons({ courseId }: CourseLessonsProps) {
       )}
 
       <div className="space-y-6">
-        {Object.entries(groupedLessons).map(([moduleName, moduleLessons]) => {
-          const moduleIds = moduleLessons.map((l) => l.id);
-          const allModuleSelected = moduleIds.length > 0 && moduleIds.every((id) => selectedLessonIds.includes(id));
+        {modules.length === 0 ? (
+          <p className="text-sm text-slate-500">No modules yet. Create modules first to add lessons.</p>
+        ) : (
+          Object.entries(groupedLessons).map(([moduleId, moduleLessons]) => {
+            const module = modules.find((m) => m.id === moduleId);
+            const moduleIds = moduleLessons.map((l) => l.id);
+            const allModuleSelected = moduleIds.length > 0 && moduleIds.every((id) => selectedLessonIds.includes(id));
 
-          return (
-            <div key={moduleName}>
-              <div className="mb-3 flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={allModuleSelected}
-                  onChange={() => handleSelectAllInModule(moduleName)}
-                  className="h-4 w-4 rounded border-slate-300 bg-slate-50 text-emerald-600 transition cursor-pointer"
-                />
-                <h3 className="text-base font-bold text-slate-900">{moduleName}</h3>
-              </div>
-            {moduleLessons.length > 0 ? (
-              <div className="space-y-3">
-                {moduleLessons.map((lesson) => {
-                  const isDragging = draggedId === lesson.id;
-                  const isDropTarget = dragOverId === lesson.id;
+            return (
+              <div key={moduleId}>
+                <div className="mb-3 flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={allModuleSelected}
+                    onChange={() => handleSelectAllInModule(moduleId)}
+                    className="h-4 w-4 rounded border-slate-300 bg-slate-50 text-emerald-600 transition cursor-pointer"
+                  />
+                  <h3 className="text-base font-bold text-slate-900">{module?.title || 'Unknown Module'}</h3>
+                </div>
+                {moduleLessons.length > 0 ? (
+                  <div className="space-y-3">
+                    {moduleLessons.map((lesson) => {
+                      const isDragging = draggedId === lesson.id;
+                      const isDropTarget = dragOverId === lesson.id;
 
-                  return (
-                  <div
-                    key={lesson.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(lesson.id, e)}
-                    onDragOver={(e) => handleDragOver(lesson.id, e)}
-                    onDragLeave={(e) => handleDragLeave(e)}
-                    onDrop={(e) => handleDrop(lesson.id, e)}
-                    onDragEnd={handleDragEnd}
-                    className={`rounded-xl border bg-white p-4 shadow-sm transition ${
-                      isDragging
-                        ? 'opacity-50 border-slate-200'
-                        : isDropTarget
-                          ? 'border-emerald-300 bg-emerald-50 shadow-md'
-                          : 'border-slate-100 hover:shadow-md'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <GripVertical className="h-5 w-5 text-slate-400 flex-shrink-0 cursor-grab active:cursor-grabbing" strokeWidth={2} />
-                        <input
-                          type="checkbox"
-                          checked={selectedLessonIds.includes(lesson.id)}
-                          onChange={() => handleSelectLesson(lesson.id)}
-                          className="h-4 w-4 rounded border-slate-300 bg-slate-50 text-emerald-600 transition cursor-pointer"
-                        />
-                        {lesson.type === 'video' ? (
-                          <Video className="h-5 w-5 text-blue-600 flex-shrink-0" strokeWidth={2} />
-                        ) : lesson.type === 'pdf' ? (
-                          <FileText className="h-5 w-5 text-orange-600 flex-shrink-0" strokeWidth={2} />
-                        ) : lesson.type === 'quiz' ? (
-                          <HelpCircle className="h-5 w-5 text-purple-600 flex-shrink-0" strokeWidth={2} />
-                        ) : (
-                          <FileText className="h-5 w-5 text-purple-600 flex-shrink-0" strokeWidth={2} />
-                        )}
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-bold text-slate-900">{lesson.title}</h4>
-                            {!lesson.published && (
-                              <Lock className="h-3.5 w-3.5 text-slate-400" strokeWidth={2} />
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                            <span>{lesson.duration}</span>
-                            {lesson.type === 'quiz' && lesson.quizData && (
-                              <>
-                                <span>•</span>
-                                <span>{lesson.quizData.questions.length} questions</span>
-                                <span>•</span>
-                                <span>{lesson.quizData.passingScore}% to pass</span>
-                                {lesson.quizData.timeLimit > 0 && (
-                                  <>
-                                    <span>•</span>
-                                    <span>{lesson.quizData.timeLimit}m time limit</span>
-                                  </>
+                      const getTypeIcon = (type: string) => {
+                        switch (type) {
+                          case 'video':
+                            return <Video className="h-5 w-5 text-blue-600 flex-shrink-0" strokeWidth={2} />;
+                          case 'pdf':
+                            return <FileText className="h-5 w-5 text-orange-600 flex-shrink-0" strokeWidth={2} />;
+                          case 'audio':
+                            return <Music className="h-5 w-5 text-rose-600 flex-shrink-0" strokeWidth={2} />;
+                          case 'file':
+                            return <FileCode className="h-5 w-5 text-purple-600 flex-shrink-0" strokeWidth={2} />;
+                          case 'text':
+                            return <FileText className="h-5 w-5 text-slate-600 flex-shrink-0" strokeWidth={2} />;
+                          case 'quiz':
+                            return <HelpCircle className="h-5 w-5 text-purple-600 flex-shrink-0" strokeWidth={2} />;
+                          default:
+                            return <FileText className="h-5 w-5 text-slate-400 flex-shrink-0" strokeWidth={2} />;
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={lesson.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(lesson.id, e)}
+                          onDragOver={(e) => handleDragOver(lesson.id, e)}
+                          onDragLeave={(e) => handleDragLeave(e)}
+                          onDrop={(e) => handleDrop(lesson.id, e)}
+                          onDragEnd={handleDragEnd}
+                          className={`rounded-xl border bg-white p-4 shadow-sm transition ${
+                            isDragging
+                              ? 'opacity-50 border-slate-200'
+                              : isDropTarget
+                                ? 'border-emerald-300 bg-emerald-50 shadow-md'
+                                : 'border-slate-100 hover:shadow-md'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 flex-1">
+                              <GripVertical className="h-5 w-5 text-slate-400 flex-shrink-0 cursor-grab active:cursor-grabbing" strokeWidth={2} />
+                              <input
+                                type="checkbox"
+                                checked={selectedLessonIds.includes(lesson.id)}
+                                onChange={() => handleSelectLesson(lesson.id)}
+                                className="h-4 w-4 rounded border-slate-300 bg-slate-50 text-emerald-600 transition cursor-pointer"
+                              />
+                              {getTypeIcon(lesson.lessonType)}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h4 className="text-sm font-bold text-slate-900">{lesson.title}</h4>
+                                  <span className="inline-block rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                                    #{lesson.lessonOrder}
+                                  </span>
+                                  <span className="inline-block rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 capitalize">
+                                    {lesson.lessonType}
+                                  </span>
+                                  {!lesson.published && (
+                                    <Lock className="h-3.5 w-3.5 text-slate-400" strokeWidth={2} />
+                                  )}
+                                </div>
+                                {lesson.files && lesson.files.length > 0 && (
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                    {lesson.files.map((file) => (
+                                      <span key={file.id} className="inline-block rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-600">
+                                        📎 {file.name}
+                                      </span>
+                                    ))}
+                                  </div>
                                 )}
-                              </>
-                            )}
+                                {lesson.lessonType === 'quiz' && lesson.quizData && (
+                                  <div className="mt-2 flex items-center gap-3 text-xs text-slate-500">
+                                    <span>{lesson.quizData.questions.length} questions</span>
+                                    <span>•</span>
+                                    <span>{lesson.quizData.passingScore}% to pass</span>
+                                    {lesson.quizData.timeLimit > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span>{lesson.quizData.timeLimit}m limit</span>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                              <button
+                                onClick={() => handleToggleStatus(lesson.id)}
+                                className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${
+                                  lesson.published
+                                    ? 'bg-emerald-600'
+                                    : 'bg-slate-200'
+                                }`}
+                                aria-label={`Toggle status for ${lesson.title}`}
+                              >
+                                <span
+                                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                                    lesson.published ? 'translate-x-5' : 'translate-x-0.5'
+                                  }`}
+                                />
+                              </button>
+                              <span className="text-xs text-slate-500">{lesson.published ? 'Published' : 'Draft'}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleEditLesson(lesson.id)}
+                                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                              >
+                                <Edit2 className="h-4 w-4" strokeWidth={2} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteLesson(lesson.id)}
+                                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" strokeWidth={2} />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <button
-                          onClick={() => handleToggleStatus(lesson.id)}
-                          className={`relative inline-flex h-6 w-11 rounded-full transition-colors ${
-                            lesson.published
-                              ? 'bg-emerald-600'
-                              : 'bg-slate-200'
-                          }`}
-                          aria-label={`Toggle status for ${lesson.title}`}
-                        >
-                          <span
-                            className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
-                              lesson.published ? 'translate-x-5' : 'translate-x-0.5'
-                            }`}
-                          />
-                        </button>
-                        <span className="text-xs text-slate-500">{lesson.published ? 'Published' : 'Draft'}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEditLesson(lesson.id)}
-                          className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                        >
-                          <Edit2 className="h-4 w-4" strokeWidth={2} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteLesson(lesson.id)}
-                          className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-red-600"
-                        >
-                          <Trash2 className="h-4 w-4" strokeWidth={2} />
-                        </button>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
-                );
-                })}
+                ) : (
+                  <p className="text-sm text-slate-500">No lessons in this module yet</p>
+                )}
               </div>
-            ) : (
-              <p className="text-sm text-slate-500">No lessons in this module yet</p>
-            )}
-          </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       <ConfirmDialog
