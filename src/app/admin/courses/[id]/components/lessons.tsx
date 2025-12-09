@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { Video, FileText, Plus, Edit2, Trash2, Lock, X, HelpCircle } from 'lucide-react';
 import { QuizForm, type QuizData, type Question } from './quiz-form';
 
-const initialLessons = [
+const initialLessons: Array<{
+  id: number;
+  title: string;
+  type: 'video' | 'pdf' | 'downloadable' | 'quiz';
+  duration: string;
+  module: string;
+  published: boolean;
+  quizData?: QuizData;
+}> = [
   {
     id: 1,
     title: 'Introduction to React',
@@ -24,10 +32,29 @@ const initialLessons = [
   {
     id: 3,
     title: 'React Basics Quiz',
-    type: 'document',
-    duration: '10m',
+    type: 'quiz',
+    duration: '15m',
     module: 'Getting Started with React',
     published: false,
+    quizData: {
+      questions: [
+        {
+          id: 1,
+          text: 'What is React?',
+          type: 'multiple-choice',
+          answers: [
+            { id: 1, text: 'A JavaScript library' },
+            { id: 2, text: 'A programming language' },
+            { id: 3, text: 'A CSS framework' },
+          ],
+          correctAnswers: [1],
+          feedback: 'Correct! React is a JavaScript library for building user interfaces.',
+        },
+      ],
+      passingScore: 70,
+      timeLimit: 15,
+      maxAttempts: 3,
+    },
   },
   {
     id: 4,
