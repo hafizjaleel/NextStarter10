@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, Plus, Edit2, Trash2, X } from 'lucide-react';
+import { ChevronRight, Plus, Edit2, Trash2 } from 'lucide-react';
+import { SidePanel } from '@/components/side-panel';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const initialModules = [
   {
@@ -62,8 +64,12 @@ const formatDuration = (totalMinutes: number): string => {
 export function CourseModules() {
   const [modules, setModules] = useState(initialModules);
   const [lessons] = useState(initialLessons);
-  const [showForm, setShowForm] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null,
+  });
   const [formData, setFormData] = useState({
     title: '',
   });
@@ -80,7 +86,7 @@ export function CourseModules() {
     if (moduleToEdit) {
       setFormData({ title: moduleToEdit.title });
       setEditingId(id);
-      setShowForm(true);
+      setIsPanelOpen(true);
     }
   };
 
@@ -100,7 +106,7 @@ export function CourseModules() {
         setModules([...modules, newModule]);
       }
       setFormData({ title: '' });
-      setShowForm(false);
+      setIsPanelOpen(false);
     }
   };
 
@@ -116,14 +122,31 @@ export function CourseModules() {
   };
 
   const handleDeleteModule = (id: number) => {
-    setModules(modules.filter((m) => m.id !== id));
+    setDeleteConfirm({ isOpen: true, id });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteConfirm.id !== null) {
+      setModules(modules.filter((m) => m.id !== deleteConfirm.id));
+      setDeleteConfirm({ isOpen: false, id: null });
+    }
+  };
+
+  const handleClosePanel = () => {
+    setIsPanelOpen(false);
+    setEditingId(null);
+    setFormData({ title: '' });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setEditingId(null);
+            setFormData({ title: '' });
+            setIsPanelOpen(true);
+          }}
           className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
         >
           <Plus className="h-4 w-4" strokeWidth={2} />
@@ -131,61 +154,44 @@ export function CourseModules() {
         </button>
       </div>
 
-      {showForm && (
-        <div className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-base font-bold text-slate-900">
-              {editingId !== null ? 'Edit Module' : 'Add New Module'}
-            </h3>
+      <SidePanel
+        isOpen={isPanelOpen}
+        onClose={handleClosePanel}
+        title={editingId !== null ? 'Edit Module' : 'Add New Module'}
+      >
+        <form onSubmit={handleAddModule} className="space-y-4">
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-slate-900 mb-1">
+              Module Title
+            </label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              value={formData.title}
+              onChange={handleInputChange}
+              placeholder="e.g., Getting Started with React"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              required
+            />
+          </div>
+          <div className="flex gap-3 pt-2">
             <button
-              onClick={() => {
-                setShowForm(false);
-                setEditingId(null);
-                setFormData({ title: '' });
-              }}
-              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              type="submit"
+              className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
             >
-              <X className="h-4 w-4" strokeWidth={2} />
+              {editingId !== null ? 'Update Module' : 'Add Module'}
+            </button>
+            <button
+              type="button"
+              onClick={handleClosePanel}
+              className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            >
+              Cancel
             </button>
           </div>
-          <form onSubmit={handleAddModule} className="space-y-4">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-slate-900 mb-1">
-                Module Title
-              </label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="e.g., Getting Started with React"
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-500 transition focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                required
-              />
-            </div>
-            <div className="flex gap-3 pt-2">
-              <button
-                type="submit"
-                className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
-              >
-                {editingId !== null ? 'Update Module' : 'Add Module'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setFormData({ title: '' });
-                }}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+        </form>
+      </SidePanel>
 
       <div className="space-y-3">
         {modules.map((module) => {
@@ -223,6 +229,17 @@ export function CourseModules() {
           );
         })}
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Delete Module?"
+        message="This action cannot be undone. All lessons in this module will remain, but the module will be deleted."
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDangerous={true}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, id: null })}
+      />
     </div>
   );
 }

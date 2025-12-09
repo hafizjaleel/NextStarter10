@@ -84,8 +84,8 @@ export default function CoursesPage() {
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="space-y-4">
-        <div className="flex-1 max-w-md">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-4">
+        <div className="flex-1">
           <SearchInput
             placeholder="Search courses..."
             value={search}
