@@ -78,6 +78,10 @@ export function CourseLessons() {
   const [lessons, setLessons] = useState(initialLessons);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null,
+  });
   const [selectedLessonIds, setSelectedLessonIds] = useState<number[]>([]);
   const [formData, setFormData] = useState({
     title: '',
