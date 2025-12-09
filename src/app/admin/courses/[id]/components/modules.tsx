@@ -189,10 +189,22 @@ export function CourseModules({ courseId }: CourseModulesProps) {
     setDeleteConfirm({ isOpen: true, id });
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteConfirm.id !== null) {
-      setModules(modules.filter((m) => m.id !== deleteConfirm.id));
-      setDeleteConfirm({ isOpen: false, id: null });
+      try {
+        const response = await fetch(`/api/v1/course/module/delete/${deleteConfirm.id}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete module');
+        }
+
+        setModules(modules.filter((m) => m.id !== deleteConfirm.id));
+        setDeleteConfirm({ isOpen: false, id: null });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      }
     }
   };
 
