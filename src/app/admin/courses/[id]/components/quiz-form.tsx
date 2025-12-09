@@ -34,6 +34,7 @@ interface QuizFormProps {
 export function QuizForm({ quizData, onQuizDataChange }: QuizFormProps) {
   const [expandedQuestionId, setExpandedQuestionId] = useState<number | null>(null);
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
+  const [desiredNumberOfQuestions, setDesiredNumberOfQuestions] = useState(quizData.questions.length);
   const [questionFormData, setQuestionFormData] = useState<Partial<Question>>({
     text: '',
     type: 'multiple-choice',
@@ -50,6 +51,42 @@ export function QuizForm({ quizData, onQuizDataChange }: QuizFormProps) {
       ...quizData,
       [field]: value,
     });
+  };
+
+  const handleNumberOfQuestionsChange = (newNumber: number) => {
+    setDesiredNumberOfQuestions(newNumber);
+
+    const currentCount = quizData.questions.length;
+
+    if (newNumber > currentCount) {
+      // Add empty questions
+      const newQuestions = [...quizData.questions];
+      for (let i = currentCount; i < newNumber; i++) {
+        const newId = Math.max(...newQuestions.map((q) => q.id), 0) + 1;
+        newQuestions.push({
+          id: newId,
+          text: '',
+          type: 'multiple-choice' as QuestionType,
+          answers: [
+            { id: 1, text: '' },
+            { id: 2, text: '' },
+          ],
+          correctAnswers: [],
+          feedback: '',
+        });
+      }
+      onQuizDataChange({
+        ...quizData,
+        questions: newQuestions,
+      });
+    } else if (newNumber < currentCount) {
+      // Remove questions from the end
+      const newQuestions = quizData.questions.slice(0, newNumber);
+      onQuizDataChange({
+        ...quizData,
+        questions: newQuestions,
+      });
+    }
   };
 
   const handleAddQuestion = () => {
