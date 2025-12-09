@@ -112,33 +112,65 @@ export function CourseModules({ courseId }: CourseModulesProps) {
     }
   };
 
-  const handleAddModule = (e: React.FormEvent) => {
+  const handleAddModule = async (e: React.FormEvent) => {
     e.preventDefault();
     const moduleOrder = parseInt(formData.moduleOrder, 10);
     if (formData.title && !isNaN(moduleOrder) && moduleOrder > 0) {
-      if (editingId !== null) {
-        // Update existing module
-        setModules(modules.map((m) => (m.id === editingId ? { ...m, title: formData.title, moduleOrder } : m)));
-        setEditingId(null);
-      } else {
-        // Add new module with reordering if needed
-        const newModule = {
-          id: Math.max(...modules.map((m) => m.id), 0) + 1,
-          title: formData.title,
-          moduleOrder,
-        };
+      try {
+        if (editingId !== null) {
+          // Update existing module
+          const response = await fetch(`/api/v1/course/module/update/${editingId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: formData.title,
+              moduleOrder,
+            }),
+          });
 
-        // Reorder existing modules if the new order conflicts
-        const updatedModules = modules.map((m) =>
-          m.moduleOrder >= moduleOrder
-            ? { ...m, moduleOrder: m.moduleOrder + 1 }
-            : m
-        );
+          if (!response.ok) {
+            throw new Error('Failed to update module');
+          }
 
-        setModules([...updatedModules, newModule]);
+          setModules(modules.map((m) => (m.id === editingId ? { ...m, title: formData.title, moduleOrder } : m)));
+          setEditingId(null);
+        } else {
+          // Create new module with reordering if needed
+          const response = await fetch('/api/v1/course/module/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: formData.title,
+              courseId,
+              moduleOrder,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to create module');
+          }
+
+          const data = await response.json();
+          const newModule = data.module || {
+            id: Math.max(...modules.map((m) => (typeof m.id === 'number' ? m.id : 0)), 0) + 1,
+            title: formData.title,
+            moduleOrder,
+          };
+
+          // Reorder existing modules if the new order conflicts
+          const updatedModules = modules.map((m) =>
+            m.moduleOrder >= moduleOrder
+              ? { ...m, moduleOrder: m.moduleOrder + 1 }
+              : m
+          );
+
+          setModules([...updatedModules, newModule]);
+        }
+        setFormData({ title: '', moduleOrder: '' });
+        setIsPanelOpen(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
       }
-      setFormData({ title: '', moduleOrder: '' });
-      setIsPanelOpen(false);
     }
   };
 
