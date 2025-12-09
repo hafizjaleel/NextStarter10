@@ -127,7 +127,7 @@ export function CourseLessons() {
         },
       });
       setEditingId(id);
-      setShowForm(true);
+      setIsPanelOpen(true);
     }
   };
 
