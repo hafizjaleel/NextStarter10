@@ -118,6 +118,12 @@ export function CourseLessons() {
         muxVideo: lessonToEdit.type === 'video' ? 'existing-video' : '',
         pdfFile: null,
         downloadableFile: null,
+        quizData: lessonToEdit.quizData || {
+          questions: [],
+          passingScore: 70,
+          timeLimit: 0,
+          maxAttempts: 0,
+        },
       });
       setEditingId(id);
       setShowForm(true);
